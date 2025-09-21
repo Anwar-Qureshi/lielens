@@ -31,7 +31,7 @@ app = FastAPI(
 # Configure CORS for frontend integration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://5500-cs-13102a53-7d67-4d88-9c9c-7bc40db54444.cs-asia-southeast1-cash.cloudshell.dev"],  # Configure properly for production
+    allow_origins=["*"],  # Allow all origins for demo/development - configure properly for production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -214,11 +214,21 @@ class GeminiAnalyzer:
     """Handle Gemini API integration for content analysis"""
     
     def __init__(self):
-        # NOTE: For this notebook, we'll get the key from the environment variable.
-        self.api_key = os.getenv('GEMINI_API_KEY')
+        # Try multiple ways to get the API key
+        self.api_key = (
+            os.getenv('GEMINI_API_KEY') or 
+            os.getenv('GOOGLE_API_KEY') or 
+            os.getenv('API_KEY')
+        )
+        
         if self.api_key:
-            genai.configure(api_key=self.api_key)
-            self.model = genai.GenerativeModel('gemini-1.5-pro')
+            try:
+                genai.configure(api_key=self.api_key)
+                self.model = genai.GenerativeModel('gemini-1.5-pro')
+                logger.info("Gemini API configured successfully")
+            except Exception as e:
+                logger.warning(f"Failed to configure Gemini API: {e}")
+                self.model = None
         else:
             self.model = None
             logger.warning("Gemini API key not found - running in demo mode")
@@ -406,7 +416,14 @@ async def http_exception_handler(request, exc):
         timestamp=datetime.utcnow().isoformat()
     )
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8081)) 
-    import nest_asyncio
-    nest_asyncio.apply()
-    uvicorn.run(app, host="0.0.0.0", port=port)    
+    port = int(os.getenv("PORT", 8000))  # Default to 8000, but allow PORT env var
+    host = os.getenv("HOST", "0.0.0.0")
+    
+    try:
+        import nest_asyncio
+        nest_asyncio.apply()
+    except ImportError:
+        pass  # nest_asyncio not available, continue without it
+    
+    logger.info(f"Starting server on {host}:{port}")
+    uvicorn.run(app, host=host, port=port)    
