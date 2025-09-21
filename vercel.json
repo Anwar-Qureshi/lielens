@@ -2,17 +2,23 @@
   "version": 2,
   "builds": [
     {
-      "src": "lielens-backend/app.py",
+      "src": "api/index.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "api/index.py"
+    },
+    {
       "src": "/(.*)",
-      "dest": "lielens-backend/app.py"
+      "dest": "api/index.py"
     }
   ],
-  "env": {
-    "PORT": "8000"
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 30
+    }
   }
 }

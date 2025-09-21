@@ -1,6 +1,7 @@
 // Enhanced LieLens Frontend Script with multiple backend support
 // List of potential backend URLs (add your deployed URLs here)
 const backendUrls = [
+    'https://lielens.vercel.app',  // Vercel deployment (replace with your actual Vercel URL)
     'https://your-render-app.onrender.com',  // Replace with your Render URL
     'https://your-railway-app.up.railway.app',  // Replace with your Railway URL
     'http://localhost:8000',  // Local development
